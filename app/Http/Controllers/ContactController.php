@@ -13,16 +13,32 @@ class ContactController extends Controller
     public function create(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'email' => 'required|string|email',
+            'email' => 'required|string|email|exists:users,email',
             'name' => 'required|string|max:255',
         ]);
 
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+            return response()->json($validator->errors(), 400);
         }
 
+        // Obtener el usuario que será añadido como contacto
         $contactUser = User::where('email', $request->email)->first();
 
+        // Verificar que no se esté agregando a sí mismo
+        if ($contactUser->id == $request->user()->id) {
+            return response()->json(['message' => 'You cannot add yourself as a contact'], 400);
+        }
+
+        // Verificar si el contacto ya existe
+        $existingContact = Contact::where('user_id', $request->user()->id)
+                                  ->where('contact_id', $contactUser->id)
+                                  ->first();
+
+        if ($existingContact) {
+            return response()->json(['message' => 'This contact already exists'], 400);
+        }
+
+        // Crear el contacto
         $contact = Contact::create([
             'user_id' => $request->user()->id,
             'contact_id' => $contactUser->id,
