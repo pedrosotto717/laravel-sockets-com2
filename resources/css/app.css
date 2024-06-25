@@ -1,0 +1,36 @@
+* {
+    font-family: "Playwrite NG Modern", cursive;
+    box-sizing: border-box;
+}
+
+h1 {
+    margin: 0;
+    margin-bottom: 16px;
+    padding: 0;
+}
+
+body {
+    padding: 0;
+    margin: 0;
+    background: #0c1317;
+    color: #fff !important;
+    max-width: 100%;
+}
+
+#app {
+    top: 19px;
+    width: calc(100% - 38px);
+    height: calc(100% - 38px);
+    height: 100%;
+    padding: 16px;
+    max-width: 1700px;
+    margin: 0 auto;
+}
+
+.create-group .contacts-container .v-input__details{
+    height: 0;
+    visibility: hidden;
+    margin: 0;
+    padding: 0;
+    display: none;
+}
