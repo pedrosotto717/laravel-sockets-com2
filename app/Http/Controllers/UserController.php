@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
@@ -69,8 +70,18 @@ class UserController extends Controller
 
     public function getUser(Request $request)
     {
-        return response()->json($request->user());
+        $user = $request->user();
+
+        // Agregar URL de la foto de perfil si existe
+        if ($user->profile_photo) {
+            $user->profile_photo_url = Storage::url($user->profile_photo);
+        } else {
+            $user->profile_photo_url = null; // O puedes asignar una URL de imagen predeterminada
+        }
+
+        return response()->json($user);
     }
+
 
 
     public function updateProfile(Request $request)
@@ -79,6 +90,8 @@ class UserController extends Controller
             'name' => 'sometimes|required|string|max:255',
             'email' => 'sometimes|required|string|email|max:255|unique:users,email,' . $request->user()->id,
             'password' => 'sometimes|required|string|min:8',
+            'profile_photo' => 'sometimes|image|max:2048',  // Asegúrate de validar como imagen y limitar el tamaño
+            'color_theme' => 'sometimes|required|string|max:255'
         ]);
 
         if ($validator->fails()) {
@@ -96,8 +109,17 @@ class UserController extends Controller
         if ($request->has('password')) {
             $user->password = Hash::make($request->password);
         }
+        if ($request->hasFile('profile_photo')) {
+            $path = $request->file('profile_photo')->store('profile_photos', 'public');
+            $user->profile_photo = $path;
+        }
+        if ($request->has('color_theme')) {
+            $user->color_theme = $request->color_theme;
+        }
+
         $user->save();
 
         return response()->json(['message' => 'Profile updated successfully']);
     }
+
 }
