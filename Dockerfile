@@ -1,6 +1,6 @@
 FROM php:8.3-fpm
 
-# Instalar dependencias del sistema para PHP y extensiones necesarias
+# Instalar dependencias del sistema
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libonig-dev \
@@ -14,19 +14,16 @@ RUN apt-get update && apt-get install -y \
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
 # Instalar Composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Configurar directorio de trabajo
 WORKDIR /var/www
 
-# Copiar la aplicación al contenedor
+# Copiar el código de la aplicación
 COPY . /var/www
 
-# Asignar permisos a la carpeta de la aplicación
+# Configurar permisos
 RUN chown -R www-data:www-data /var/www
 
-# Exponer el puerto 9000
+# Exponer puerto 9000
 EXPOSE 9000
-
-# Comando para ejecutar PHP-FPM
-CMD ["php-fpm"]
