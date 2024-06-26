@@ -14,8 +14,18 @@
             <div class="messages">
                 <div v-for="message in chatHistory.messages.messages" :key="message.id" class="message"
                     :class="{ 'mine': message.user_id === userData.id, 'recived': message.user_id !== userData.id }">
-                    <span class="content">{{ message.message }} <span class="time">{{ formatDate(message.updated_at)
-                            }}</span></span>
+                    <span class="content">
+                        <template v-if="message.message">
+                            {{ message.message }}
+                        </template>
+                        <template v-else-if="message.file_url">
+                            <a :href="message.file_url" target="_blank">
+                                <i class="fas fa-paperclip icon"></i>
+                                Archivo{{ getFileExtension(message.file_url) }}
+                            </a>
+                        </template>
+                        <span class="time">{{ formatDate(message.updated_at) }}</span>
+                    </span>
                 </div>
             </div>
 
@@ -114,6 +124,10 @@ export default {
         openBlockUserDialog() {
             this.isBlockUserDialogOpen = true;
         },
+        getFileExtension(url) {
+            const ext = url.split('.').pop();
+            return ext ? `.${ext}` : '';
+        },
     }
 };
 </script>
@@ -179,9 +193,6 @@ export default {
         padding-bottom: 32px;
         height: calc(100% - 68px);
         overflow-y: scroll;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-end;
     }
 
     .message {
@@ -201,6 +212,15 @@ export default {
         text-align: left;
         display: flex;
         flex-wrap: wrap;
+
+        .icon {
+            display: inline-block;
+            margin-right: 8px;
+        }
+        
+        a {
+            color: $text-color;
+        }
     }
 
     .message.mine span.content {

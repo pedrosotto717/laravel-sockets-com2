@@ -25,7 +25,7 @@ export const sendMessage = async (message, groupId) => {
 
 export const sendFileMessage = async (formData) => {
     try {
-        const response = await axios.post('/api/messages/send-file', formData, {
+        const response = await axios.post('messages/attachments', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }

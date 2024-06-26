@@ -37,7 +37,6 @@ export default {
     watch: {
         activeGroupId(value) {
             if(value) {
-                console.log(value)
                 this.handlerConnectToChannel(value);
             }
         }
@@ -62,14 +61,18 @@ export default {
             return items.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
         },
 
-        async handleChatSelected(chat) {
-            let chatGroupId = chat.pivot.chat_group_id
-            this.activeGroupId = chatGroupId
-            try {
+        async handleChatSelected(chat, newLoad=false) {
+            let chatGroupId = chat.id;
+            this.activeGroupId = chatGroupId;
+
+            if(newLoad) {
                 this.loadingChat = true;
+                this.activeGroup = chat;
+            }
+
+            try {
                 const messages = await fetchMessages(chatGroupId);
                 this.chatHistory = { ...this.chatHistory, messages, id: chatGroupId };
-                this.activeGroup = chat;
                 this.loadingChat = false;
             } catch (error) {
                 console.error("Error fetching chat details:", error);
@@ -83,8 +86,8 @@ export default {
 
                 this.channelName = `chat-group.${activeGroupId}`;
                 this.channel = connectToChannel(this.channelName);
-                this.channel.bind(channelAlias, function () {
-                    self.handleChatSelected({id: this.activeGroupId})
+                this.channel.bind(channelAlias, function (val) {
+                    self.handleChatSelected({id: activeGroupId})
                 });
             }
         },

@@ -59,6 +59,7 @@ export default {
                 { title: 'Agregar contacto', action: this.openAddUserDialog },
                 { title: 'Crear grupo', action: this.createGroup },
                 { title: 'Cambiar opciones de perfil', action: this.openEditProfileDialog },
+                { title: 'Cerrar Sesión', action: this.openEditProfileDialog },
             ],
             isAddUserDialogOpen: false,
             isCreateGroupDialogOpen: false,
@@ -93,7 +94,7 @@ export default {
             this.$emit('refresh-contacts');
         },
         handleChatSelected(chat) {
-            this.$emit('chat-selected', chat);
+            this.$emit('chat-selected', chat, true);
         },
         handleContactSelected(contact) {
             console.log('Contact selected for conversation:', contact);
