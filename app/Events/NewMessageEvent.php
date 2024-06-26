@@ -4,10 +4,13 @@ namespace App\Events;
 
 use App\Models\ChatMessage;
 use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
-class NewMessageEvent
+
+class NewMessageEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -30,11 +33,13 @@ class NewMessageEvent
      */
     public function broadcastOn()
     {
-        return ['chat-group.' . $this->chatGroupId];
+        
+        return  ['chat-group.' . $this->chatGroupId];
     }
 
     public function broadcastAs()
     {
+        
         return 'new-message.' . $this->chatGroupId;
     }
 }

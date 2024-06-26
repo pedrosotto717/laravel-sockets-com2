@@ -8,6 +8,7 @@ use App\Models\ChatMessage;
 use App\Models\Contact;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -54,6 +55,7 @@ class MessageController extends Controller
             'message' => $request->message,
         ]);
 
+        // Log::info(print_r($chatMessage, true));
         broadcast(new NewMessageEvent($chatGroup->id));
         
         return response()->json(['message' => 'Message sent successfully', 'chat_message' => $chatMessage], 201);
