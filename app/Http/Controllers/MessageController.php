@@ -38,7 +38,10 @@ class MessageController extends Controller
             // Obtener o crear el chat grupal entre ambos usuarios
             $chatGroup = ChatGroup::where('is_group', false)
                 ->whereHas('users', function ($query) use ($request, $recipientUser) {
-                    $query->whereIn('user_id', [$request->user()->id, $recipientUser->id]);
+                    $query->where('user_id', $request->user()->id);
+                })
+                ->whereHas('users', function ($query) use ($recipientUser) {
+                    $query->where('user_id', $recipientUser->id);
                 })
                 ->first();
 
@@ -55,7 +58,6 @@ class MessageController extends Controller
             'message' => $request->message,
         ]);
 
-        // Log::info(print_r($chatMessage, true));
         broadcast(new NewMessageEvent($chatGroup->id));
         
         return response()->json(['message' => 'Message sent successfully', 'chat_message' => $chatMessage], 201);

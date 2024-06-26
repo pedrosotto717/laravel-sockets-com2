@@ -10,12 +10,17 @@ export const fetchMessages = async (chatGroupId) => {
     }
 };
 
-export const sendMessage = async (message, groupId) => {
+export const sendMessage = async (message, groupId, recipientEmail = "") => {
     try {
-        const response = await axios.post('messages/send', {
-            message: message,
-            group_id: groupId
-        });
+        let body = {message: message}
+
+        if(!groupId) {
+            body.recipient_email = recipientEmail;
+        } else {
+            body.group_id = groupId;
+        }
+
+        const response = await axios.post('messages/send', body);
         return response.data;  // Supongamos que la API devuelve algún dato útil aquí.
     } catch (error) {
         console.error('Failed to send message:', error);

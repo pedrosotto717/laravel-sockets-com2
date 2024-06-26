@@ -1,16 +1,18 @@
 <template>
     <div class="chat-container" v-if="loaded">
-        <ChatSidebar :contacts="contacts" :user-data="userData" :chats="chats" @refresh-contacts="refreshContacts"
-            @chat-selected="handleChatSelected" />
+        <ChatSidebar :contacts="contacts" :user-data="userData" :chats="chats"
+            :contactsWithoutChat="contactsWithoutChat" @refresh-contacts="refreshContacts"
+            @chat-selected="handleChatSelected" @start-conversation="handleStartConversation" />
+
         <MessageArea v-if="chatHistory" :chatHistory="chatHistory" :activeGroup="activeGroup" :user-data="userData"
-            :loading="loadingChat" />
+            :loading="loadingChat" @chat-created="handleChatSelected" />
     </div>
     <v-progress-circular v-else indeterminate color="primary"></v-progress-circular>
 </template>
 
 <script>
 import { connectToChannel, disconnectFromChannel } from '@/plugins/pusher';
-import { fetchUserData, fetchContacts, fetchGroups, fetchMessages } from '../api';
+import { fetchUserData, fetchContacts, fetchGroups, fetchMessages, fetchContactsWithoutChat } from '../api';
 import ChatSidebar from './chat/ChatSidebar.vue';
 import MessageArea from './chat/MessageArea.vue';
 
@@ -27,6 +29,7 @@ export default {
             chats: [],
             chatHistory: {},
             activeGroup: {},
+            contactsWithoutChat: {},
             loadingChat: false,
             activeGroupId: null,
         };
@@ -36,7 +39,7 @@ export default {
     },
     watch: {
         activeGroupId(value) {
-            if(value) {
+            if (value) {
                 this.handlerConnectToChannel(value);
             }
         }
@@ -46,6 +49,7 @@ export default {
             try {
                 this.userData = await fetchUserData();
                 this.contacts = await fetchContacts();
+                this.contactsWithoutChat = await fetchContactsWithoutChat();
                 this.chats = await fetchGroups();
                 this.loaded = true;
             } catch (error) {
@@ -61,13 +65,14 @@ export default {
             return items.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
         },
 
-        async handleChatSelected(chat, newLoad=false) {
+        async handleChatSelected(chat, newLoad = false) {
             let chatGroupId = chat.id;
             this.activeGroupId = chatGroupId;
 
-            if(newLoad) {
+            if (newLoad) {
                 this.loadingChat = true;
                 this.activeGroup = chat;
+                this.refreshContacts();
             }
 
             try {
@@ -79,15 +84,21 @@ export default {
             }
         },
 
+        handleStartConversation(contactInfo) {
+            console.log('Starting conversation with:', contactInfo);
+            this.activeGroup = { name: "", users:[contactInfo], id:null}
+            this.chatHistory = {}
+        },
+
         handlerConnectToChannel(activeGroupId) {
             if (activeGroupId) {
                 const channelAlias = `new-message.${activeGroupId}`,
-                self = this;
+                    self = this;
 
                 this.channelName = `chat-group.${activeGroupId}`;
                 this.channel = connectToChannel(this.channelName);
                 this.channel.bind(channelAlias, function (val) {
-                    self.handleChatSelected({id: activeGroupId})
+                    self.handleChatSelected({ id: activeGroupId })
                 });
             }
         },

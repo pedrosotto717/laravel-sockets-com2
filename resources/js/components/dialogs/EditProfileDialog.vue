@@ -8,20 +8,21 @@
             <v-card-text>
                 <v-form>
                     <div class="image-container">
-                        <img :src="userData.profile_photo_url || defaultProfile" alt="Profile Image" class="image-profile" @click="triggerFileInput" />
+                        <img :src="imageSrc || defaultProfile" alt="Profile Image" class="image-profile"
+                            @click="triggerFileInput" />
                     </div>
 
                     <input type="hidden" v-model="userId" />
                     <v-text-field label="Nuevo username" v-model="username" />
-                    
+
                     <input type="file" ref="fileInput" style="display: none" @change="previewImage" accept="image/*" />
-                    
+
                     <!-- Selección de colores -->
                     <span class="color-title">Color del Tema:</span>
                     <div class="color-selection-container">
                         <div v-for="color in colors" :key="color"
-                            :style="{ backgroundColor: color, width: '30px', height: '30px', borderRadius: '50%', cursor: 'pointer' }"
-                            @click="selectColor(color)"></div>
+                            :style="{ backgroundColor: color }"
+                            :class="{ active: color === selectedColor }" @click="selectColor(color)"></div>
 
                         <input type="radio" v-model="selectedColor" v-for="color in colors" :key="'radio-' + color"
                             :value="color" style="display: none" />
@@ -39,6 +40,7 @@
 
 <script>
 import defaultProfile from '@/assets/images/profile-default.jpg';
+import { updateUserProfile } from '@/api/user';
 
 export default {
     props: {
@@ -52,10 +54,11 @@ export default {
         return {
             defaultProfile: defaultProfile,
             userId: this.userData.user_id || '',
-            username: this.userData.username || '',
-            imageSrc: this.userData.image || '',
-            selectedColor: this.userData.color || '',
+            username: this.userData.name || '',
+            imageSrc: this.userData.profile_photo_url || '',
+            selectedColor: this.userData.color_theme || '',
             colors: ['#3d86c7', '#FFD700', '#90EE90', '#ADD8E6', '#FFA07A'],
+            profilePhotoFile: null,
         };
     },
     computed: {
@@ -65,13 +68,28 @@ export default {
         }
     },
     methods: {
-        saveChanges() {
-            console.log("Cambios guardados:", this.userId, this.username, this.imageSrc, this.selectedColor);
-            this.dialog = false;
+        async saveChanges() {
+            const formData = new FormData();
+            formData.append('email', this.userData.email);  // Suponiendo que email está disponible en userData
+            formData.append('name', this.username);
+            if (this.profilePhotoFile) {
+                formData.append('profile_photo', this.profilePhotoFile);
+            }
+            formData.append('color_theme', this.selectedColor);
+
+            try {
+                const response = await updateUserProfile(formData);
+                alert(response.message);  // Mensaje de éxito desde la API
+                this.dialog = false;
+                this.$emit('profile-updated');
+            } catch (error) {
+                alert('Error updating profile: ' + error.message);
+            }
         },
         previewImage(event) {
             const file = event.target.files[0];
             if (file) {
+                this.profilePhotoFile = file;  // Guarda el archivo para enviarlo
                 const reader = new FileReader();
                 reader.onload = (e) => this.imageSrc = e.target.result;
                 reader.readAsDataURL(file);
@@ -88,31 +106,44 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.image-container {
+    max-width: 200px;
+    max-height: 200px;
+    aspect-ratio: 1/1;
+    margin: 0 auto;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-bottom: 16px;
+}
 
-    .image-container {
-        max-width: 200px;
-        max-height: 200px;
-        aspect-ratio: 1/1;
-        margin: 0 auto;
+.image-profile {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    cursor: pointer;
+}
+
+.color-selection-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    div {
+        width: 30px;
+        height: 30px;
         border-radius: 50%;
-        overflow: hidden;
-        margin-bottom: 16px;
+        cursor: pointer;
     }
 
-    .image-profile {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
+    .active {
+        width: 40px;
+        height: 40px;
     }
+}
 
-    .color-selection-container {
-        display: flex;
-        gap: 8px;
-    }
-
-    .color-title {
-        display: inline-block;
-        margin-top: 16px;
-        margin-bottom: 16px;
-    }
+.color-title {
+    display: inline-block;
+    margin-top: 16px;
+    margin-bottom: 16px;
+}
 </style>

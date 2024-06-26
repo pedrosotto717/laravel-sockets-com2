@@ -19,3 +19,13 @@ export const register = async (userData) => {
         throw error.response.data.message; // Lanzamos el error para ser manejado en el componente
     }
 };
+
+export const logout = async () => {
+    try {
+        const response = await axios.post('/logout');
+        localStorage.removeItem('token'); // Eliminamos el token del almacenamiento local
+        return response.data;
+    } catch (error) {
+        throw error.response.data.message;
+    }
+};

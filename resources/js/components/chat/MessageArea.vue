@@ -1,20 +1,20 @@
 <template>
-    <section class="chat-area" :class="{ 'loading': loading || !chatHistory || !activeGroup }">
+    <section class="chat-area" :class="{ 'loading': loading || !activeGroup }">
         <!-- Encabezado solo se muestra si hay un chat activo y no está cargando -->
-        <header class="chat-header" v-if="chatHistory && !loading">
+        <header class="chat-header" v-if="(chatHistory || activeGroup) && !loading">
             <div class="profile-img">
-                <img :src="userData.profile_photo_url || defaultProfile" alt="">
+                <img :src="otherUser.profile_photo_url || defaultProfile" alt="">
             </div>
             <h3 class="chat-name"><span class="name">{{ chatName }}</span></h3>
             <menu-component :items="menuItems" />
         </header>
 
         <!-- Área de mensajes solo se muestra si hay mensajes y no está cargando -->
-        <div class="messages-container" v-if="chatHistory && chatHistory.messages && !loading">
-            <div class="messages">
+        <div class="messages-container">
+            <div class="messages" v-if="chatHistory && chatHistory.messages && !loading">
                 <div v-for="message in chatHistory.messages.messages" :key="message.id" class="message"
                     :class="{ 'mine': message.user_id === userData.id, 'recived': message.user_id !== userData.id }">
-                    <span class="content">
+                    <span class="content" :style="{backgroundColor: (message.user_id === userData.id) ? userData.color_theme : '#2a3942'}">
                         <template v-if="message.message">
                             {{ message.message }}
                         </template>
@@ -33,11 +33,11 @@
                 <input type="text" v-model="newMessage" @keyup.enter="sendMessage" placeholder="Escribe un mensaje..."
                     class="message-input">
                 <input type="file" @change="attachFile" hidden ref="fileInput" />
-                
+
                 <button @click="triggerFileInput" class="attach-button">
                     <i class="fas fa-paperclip"></i>
                 </button>
-                
+
                 <button @click="sendMessage" class="send-button">
                     <i class="fa-solid fa-paper-plane"></i>
                 </button>
@@ -45,14 +45,14 @@
         </div>
 
         <!-- Muestra el loader si está cargando o si no hay chat activo -->
-        <v-progress-circular v-if="loading || !chatHistory  || !activeGroup" indeterminate color="primary"></v-progress-circular>
+        <v-progress-circular v-if="loading || !activeGroup" indeterminate color="primary"></v-progress-circular>
 
         <block-user-dialog :value="isBlockUserDialogOpen" @update:value="isBlockUserDialogOpen = $event" />
     </section>
 </template>
 
 <script>
-import { sendMessage, sendFileMessage } from '@/api';  
+import { sendMessage, sendFileMessage } from '@/api';
 import defaultProfile from '@/assets/images/profile-default.jpg';
 import MenuComponent from '../general/MenuComponent.vue';
 import BlockUserDialog from '../dialogs/BlockUserDialog.vue';
@@ -79,16 +79,17 @@ export default {
                 { title: 'Salir del Grupo', action: this.openBlockUserDialog },
             ],
             isBlockUserDialogOpen: false,
+            otherUser: {},
         };
     },
     computed: {
         chatName() {
             if (this.activeGroup.name) {
                 return this.activeGroup.name;
-            } else if(this.activeGroup.users) {
+            } else if (this.activeGroup.users) {
                 // Filtrar para no mostrar el nombre del usuario actual
-                const otherUser = this.activeGroup.users.find(user => user.id !== this.userData.id);
-                return otherUser ? otherUser.name : 'Unknown';
+                this.otherUser = this.activeGroup.users.find(user => user.id !== this.userData.id);
+                return this.otherUser ? this.otherUser.name : 'Unknown';
             }
         },
     },
@@ -98,8 +99,15 @@ export default {
         },
         async sendMessage() {
             if (this.newMessage.trim()) {
-                await sendMessage(this.newMessage, this.activeGroup.id);
+
+                let data = await sendMessage(this.newMessage, this.activeGroup.id, this.otherUser.email);
                 this.newMessage = '';
+
+                if (!this.activeGroup.id) {
+                    this.activeGroup.id = data.chat_message.chat_group_id;
+                    console.log(this.activeGroup)
+                    this.$emit('chat-created', this.activeGroup, true);
+                }
                 // new Audio(sendSound).play();  // Reproduce el sonido
             }
         },
@@ -217,7 +225,7 @@ export default {
             display: inline-block;
             margin-right: 8px;
         }
-        
+
         a {
             color: $text-color;
         }
@@ -253,7 +261,8 @@ export default {
         flex-grow: 1;
     }
 
-    .send-button, .attach-button {
+    .send-button,
+    .attach-button {
         width: 46px;
 
         &:hover {

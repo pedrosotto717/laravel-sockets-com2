@@ -21,3 +21,12 @@ export const addContact = async (email, name) => {
         }
     }
 };
+
+export const fetchContactsWithoutChat = async () => {
+    try {
+        const response = await axios.get('/contacts-without-chat');
+        return response.data.contacts;
+    } catch (error) {
+        throw new Error(error.response.data.message || 'Failed to fetch contacts without chat');
+    }
+};

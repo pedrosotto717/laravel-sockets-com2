@@ -25,8 +25,11 @@
         <add-user-dialog v-model="isAddUserDialogOpen" @contact-added="handleContactAdded" />
         <create-group-dialog v-model="isCreateGroupDialogOpen" :contacts="contacts" :user-data="userData"
             @group-created="handleGroupCreated" />
-        <edit-profile-dialog v-model="isEditProfileDialogOpen" :contacts="contacts" :user-data="userData" />
-        <start-conversation-dialog v-model="isStartConversationDialogOpen" :contacts="contacts" @contact-selected="handleContactSelected"/>
+        <edit-profile-dialog v-model="isEditProfileDialogOpen" :contacts="contacts" :user-data="userData"
+            @profile-updated="handleProfileUpdated" />
+        <start-conversation-dialog v-model="isStartConversationDialogOpen" :contacts="contactsWithoutChat"
+            @contact-selected="handleContactSelected" />
+        <logout-dialog v-model="isLogoutDialogOpen"/>
     </aside>
 </template>
 
@@ -37,6 +40,7 @@ import AddUserDialog from '../dialogs/AddUserDialog.vue';
 import CreateGroupDialog from '../dialogs/CreateGroupDialog.vue';
 import EditProfileDialog from '../dialogs/EditProfileDialog.vue';
 import StartConversationDialog from '../dialogs/StartConversationDialog.vue';
+import LogoutDialog from '../dialogs/LogoutDialog.vue';
 
 export default {
     components: {
@@ -45,11 +49,13 @@ export default {
         CreateGroupDialog,
         EditProfileDialog,
         StartConversationDialog,
+        LogoutDialog, 
     },
     props: {
         contacts: Array,
         chats: Array,
-        userData: Object
+        userData: Object,
+        contactsWithoutChat: Array,
     },
     data() {
         return {
@@ -59,12 +65,13 @@ export default {
                 { title: 'Agregar contacto', action: this.openAddUserDialog },
                 { title: 'Crear grupo', action: this.createGroup },
                 { title: 'Cambiar opciones de perfil', action: this.openEditProfileDialog },
-                { title: 'Cerrar Sesión', action: this.openEditProfileDialog },
+                { title: 'Cerrar Sesión', action: this.openLogoutDialog },
             ],
             isAddUserDialogOpen: false,
             isCreateGroupDialogOpen: false,
             isEditProfileDialogOpen: false,
             isStartConversationDialogOpen: false,
+            isLogoutDialogOpen: false, 
         };
     },
     methods: {
@@ -80,6 +87,9 @@ export default {
         openStartConversationDialog() {
             this.isStartConversationDialogOpen = true;
         },
+        openLogoutDialog() {
+            this.isLogoutDialogOpen = true;
+        },
 
         getImageUrl(contact) {
             return contact.profile_photo_url ? contact.profile_photo_url : this.defaultProfile;
@@ -89,6 +99,9 @@ export default {
             this.isAddUserDialogOpen = false; // Cerrar el diálogo
             this.$emit('refresh-contacts');
         },
+        handleProfileUpdated() {
+            this.isEditProfileDialogOpen = false; // Cerrar el diálogo
+        },
         handleGroupCreated() {
             this.isCreateGroupDialogOpen = false; // Cerrar el diálogo
             this.$emit('refresh-contacts');
@@ -97,8 +110,8 @@ export default {
             this.$emit('chat-selected', chat, true);
         },
         handleContactSelected(contact) {
-            console.log('Contact selected for conversation:', contact);
-            // Logica
+            this.isStartConversationDialogOpen = false; // Cerrar el diálogo
+            this.$emit('start-conversation', contact);
         },
 
         getChatName(chat) {
@@ -182,5 +195,6 @@ export default {
 .chats-container {
     overflow-y: scroll;
     height: 100%;
+    padding-top: 57px;
 }
 </style>
