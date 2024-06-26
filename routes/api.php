@@ -23,5 +23,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/groups', [GroupController::class, 'createGroup']);
     Route::get('/groups', [GroupController::class, 'getUserGroups']);
     Route::put('/groups/add-new-member', [GroupController::class, 'addMemberToGroup']);
+
+    Route::get('/contacts-without-chat', [ContactController::class, 'getContactsWithoutChat']);
+    Route::delete('/delete-contact', [ContactController::class, 'deleteContact']);
+    Route::post('/leave-group', [GroupController::class, 'leaveGroup']);
+
 });
 
