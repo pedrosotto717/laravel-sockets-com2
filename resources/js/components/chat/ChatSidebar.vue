@@ -1,8 +1,8 @@
 <template>
     <aside class="chat-sidebar">
         <div class="profile-bar">
-            <div class="profile-img">
-                <img src="https://www.santandersmusic.com/media/magazine/shakira-disco-51-xl.webp" alt="" srcset="">
+            <div class="profile-img" @click="openEditProfileDialog">
+                <img :src="userData.profile_photo_url || defaultProfile" alt="" srcset="">
             </div>
             <div class="more-options">
                 <menu-component :items="menuItems" />
@@ -10,48 +10,33 @@
             </div>
         </div>
 
-        <!-- <div class="chats-container">
-            <div class="chat-container" v-for="chat in chats" :key="chat.id">
-                <div class="profile-img">
-                    <img :src="chat.image" alt="" srcset="">
-                </div>
-                <div class="chat-name">
-                    {{ chat.name }}
-                </div>
-            </div>
-        </div> -->
         <div class="chats-container">
-            <div class="chat-container">
+            <div class="chat-container" v-for="chat in chats" :key="chat.id" @click="handleChatSelected(chat)">
                 <div class="profile-img">
-                    <img src="https://www.santandersmusic.com/media/magazine/shakira-disco-51-xl.webp" alt="" srcset="">
+                    <img :src="chat.profile_photo_url || defaultProfile" alt="Profile Image">
                 </div>
                 <div class="chat-name">
-                    Jose Daniel
-                </div>
-            </div>
-
-            <div class="chat-container">
-                <div class="profile-img">
-                    <img src="https://www.santandersmusic.com/media/magazine/shakira-disco-51-xl.webp" alt="" srcset="">
-                </div>
-                <div class="chat-name">
-                    Jose Daniel
+                    {{ getChatName(chat) }}
                 </div>
             </div>
         </div>
 
         <!-- Dialogs -->
-        <add-user-dialog v-model="isAddUserDialogOpen" />
-        <create-group-dialog v-model="isCreateGroupDialogOpen" :contacts="contacts"/>
-        <edit-profile-dialog v-model="isEditProfileDialogOpen" :user-data="userData"/>
+        <add-user-dialog v-model="isAddUserDialogOpen" @contact-added="handleContactAdded" />
+        <create-group-dialog v-model="isCreateGroupDialogOpen" :contacts="contacts" :user-data="userData"
+            @group-created="handleGroupCreated" />
+        <edit-profile-dialog v-model="isEditProfileDialogOpen" :contacts="contacts" :user-data="userData" />
+        <start-conversation-dialog v-model="isStartConversationDialogOpen" :contacts="contacts" @contact-selected="handleContactSelected"/>
     </aside>
 </template>
 
 <script>
+import defaultProfile from '@/assets/images/profile-default.jpg';
 import MenuComponent from '../general/MenuComponent.vue';
 import AddUserDialog from '../dialogs/AddUserDialog.vue';
 import CreateGroupDialog from '../dialogs/CreateGroupDialog.vue';
 import EditProfileDialog from '../dialogs/EditProfileDialog.vue';
+import StartConversationDialog from '../dialogs/StartConversationDialog.vue';
 
 export default {
     components: {
@@ -59,40 +44,26 @@ export default {
         AddUserDialog,
         CreateGroupDialog,
         EditProfileDialog,
+        StartConversationDialog,
     },
     props: {
-        chats: Array
+        contacts: Array,
+        chats: Array,
+        userData: Object
     },
     data() {
         return {
+            defaultProfile: defaultProfile,
             menuItems: [
-                { title: 'Agregar usuario', action: this.openAddUserDialog },
+                { title: 'Iniciar Conversación', action: this.openStartConversationDialog },
+                { title: 'Agregar contacto', action: this.openAddUserDialog },
                 { title: 'Crear grupo', action: this.createGroup },
                 { title: 'Cambiar opciones de perfil', action: this.openEditProfileDialog },
             ],
             isAddUserDialogOpen: false,
             isCreateGroupDialogOpen: false,
             isEditProfileDialogOpen: false,
-            userData: {
-                user_id: '1',
-                username: 'Jose Daniel',
-                image: 'https://www.santandersmusic.com/media/magazine/shakira-disco-51-xl.webp',
-                color: '#3d86c7'
-            },
-            contacts: [
-                { user_id: 1, username: 'Usuario 1' },
-                { user_id: 2, username: 'Usuario 2' },
-                { user_id: 3, username: 'Usuario 3' },
-                { user_id: 1, username: 'Usuario 1' },
-                { user_id: 2, username: 'Usuario 2' },
-                { user_id: 3, username: 'Usuario 3' },
-                { user_id: 1, username: 'Usuario 1' },
-                { user_id: 2, username: 'Usuario 2' },
-                { user_id: 3, username: 'Usuario 3' },
-                { user_id: 1, username: 'Usuario 1' },
-                { user_id: 2, username: 'Usuario 2' },
-                { user_id: 3, username: 'Usuario 3' },
-            ]
+            isStartConversationDialogOpen: false,
         };
     },
     methods: {
@@ -104,7 +75,40 @@ export default {
         },
         openEditProfileDialog() {
             this.isEditProfileDialogOpen = true;
-        }
+        },
+        openStartConversationDialog() {
+            this.isStartConversationDialogOpen = true;
+        },
+
+        getImageUrl(contact) {
+            return contact.profile_photo_url ? contact.profile_photo_url : this.defaultProfile;
+        },
+
+        handleContactAdded() {
+            this.isAddUserDialogOpen = false; // Cerrar el diálogo
+            this.$emit('refresh-contacts');
+        },
+        handleGroupCreated() {
+            this.isCreateGroupDialogOpen = false; // Cerrar el diálogo
+            this.$emit('refresh-contacts');
+        },
+        handleChatSelected(chat) {
+            this.$emit('chat-selected', chat);
+        },
+        handleContactSelected(contact) {
+            console.log('Contact selected for conversation:', contact);
+            // Logica
+        },
+
+        getChatName(chat) {
+            if (chat.name) {
+                return chat.name;
+            } else {
+                // Filtrar para no mostrar el nombre del usuario actual
+                const otherUser = chat.users.find(user => user.id !== this.userData.id);
+                return otherUser ? otherUser.name : 'Unknown';
+            }
+        },
     }
 };
 </script>
@@ -117,6 +121,8 @@ export default {
     color: white;
     overflow-y: auto;
     border-right: $border;
+    position: relative;
+    height: 100%;
 }
 
 .profile-bar {
@@ -128,6 +134,8 @@ export default {
     background: $app-bg-light;
     border-bottom: $border;
     align-items: center;
+    position: absolute;
+    width: 100%;
 }
 
 .profile-img {
@@ -168,5 +176,10 @@ export default {
 .chat-info h5,
 .chat-info p {
     margin: 0;
+}
+
+.chats-container {
+    overflow-y: scroll;
+    height: 100%;
 }
 </style>

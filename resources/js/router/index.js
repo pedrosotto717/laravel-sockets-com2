@@ -8,6 +8,7 @@ import NotFoundPage from '../components/NotFoundPage.vue'
 // Define las rutas
 const routes = [
     { path: '/', component: LoginRegister },
+    { path: '/login', component: LoginRegister },
     { path: '/chat', component: ChatView },
     { path: '/profile', component: ProfileEdit },
     { path: '/:pathMatch(.*)*', component: NotFoundPage }
@@ -16,6 +17,18 @@ const routes = [
 const router = createRouter({
     history: createWebHistory(),
     routes,
+});
+
+router.beforeEach((to, from, next) => {
+    const publicPages = ['/', '/login']; // Páginas públicas que no requieren autenticación
+    const authRequired = !publicPages.includes(to.path);
+    const loggedIn = localStorage.getItem('token');
+
+    if (authRequired && !loggedIn) {
+        return next('/login');
+    }
+
+    next();
 });
 
 export default router;

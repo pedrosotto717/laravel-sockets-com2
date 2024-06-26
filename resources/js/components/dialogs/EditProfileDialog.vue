@@ -8,7 +8,7 @@
             <v-card-text>
                 <v-form>
                     <div class="image-container">
-                        <img :src="imageSrc" alt="Profile Image" class="image-profile" @click="triggerFileInput" />
+                        <img :src="userData.profile_photo_url || defaultProfile" alt="Profile Image" class="image-profile" @click="triggerFileInput" />
                     </div>
 
                     <input type="hidden" v-model="userId" />
@@ -38,6 +38,8 @@
 </template>
 
 <script>
+import defaultProfile from '@/assets/images/profile-default.jpg';
+
 export default {
     props: {
         value: Boolean,
@@ -48,6 +50,7 @@ export default {
     },
     data() {
         return {
+            defaultProfile: defaultProfile,
             userId: this.userData.user_id || '',
             username: this.userData.username || '',
             imageSrc: this.userData.image || '',

@@ -25,6 +25,8 @@
 </template>
   
 <script>
+import { login, register } from '../api';
+
 export default {
     data() {
         return {
@@ -37,11 +39,14 @@ export default {
         };
     },
     methods: {
-        handleSubmit() {
-            if (this.isLoginMode) {
-                // Lógica de inicio de sesión
-            } else {
-                // Lógica de registro
+        async handleSubmit() {
+            try {
+                const response = this.isLoginMode ? await login(this.user) : await register(this.user);
+                alert(response.message); // Mensaje de éxito
+                this.$router.push('/chat'); // Redireccionamos al chat
+            } catch (error) {
+                console.log(error)
+                alert(error); // Mensaje de error desde la API
             }
         },
         toggleMode() {

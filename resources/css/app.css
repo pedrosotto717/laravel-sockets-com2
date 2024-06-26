@@ -15,6 +15,9 @@ body {
     background: #0c1317;
     color: #fff !important;
     max-width: 100%;
+    min-height: 98vh;
+    display: flex;
+    align-items: center;
 }
 
 #app {
@@ -25,6 +28,7 @@ body {
     padding: 16px;
     max-width: 1700px;
     margin: 0 auto;
+    height: 100%;
 }
 
 .create-group .contacts-container .v-input__details{

@@ -1,37 +1,49 @@
 <template>
-    <section class="chat-area">
-        <header class="chat-header">
-            <!-- <h3>{{ chat.name }}</h3> -->
+    <section class="chat-area" :class="{ 'loading': loading || !chatHistory || !activeGroup }">
+        <!-- Encabezado solo se muestra si hay un chat activo y no está cargando -->
+        <header class="chat-header" v-if="chatHistory && !loading">
             <div class="profile-img">
-                <img src="https://www.santandersmusic.com/media/magazine/shakira-disco-51-xl.webp" alt="" srcset="">
+                <img :src="userData.profile_photo_url || defaultProfile" alt="">
             </div>
-
-            <h3 class="chat-name"><span class="name">Jose</span></h3>
+            <h3 class="chat-name"><span class="name">{{ chatName }}</span></h3>
             <menu-component :items="menuItems" />
         </header>
 
-        <div class="messages-container">
+        <!-- Área de mensajes solo se muestra si hay mensajes y no está cargando -->
+        <div class="messages-container" v-if="chatHistory && chatHistory.messages && !loading">
             <div class="messages">
-                <div v-for="message in messages" :key="message.id" class="message"
-                    :class="{ 'mine': message.user_id === user_id, 'recived': message.user_id !== user_id }">
-                    <span class="content">{{ message.text }} <span class="time">{{ message.updated_at }}</span></span>
+                <div v-for="message in chatHistory.messages.messages" :key="message.id" class="message"
+                    :class="{ 'mine': message.user_id === userData.id, 'recived': message.user_id !== userData.id }">
+                    <span class="content">{{ message.message }} <span class="time">{{ formatDate(message.updated_at)
+                            }}</span></span>
                 </div>
             </div>
 
             <div class="message-input-container">
                 <input type="text" v-model="newMessage" @keyup.enter="sendMessage" placeholder="Escribe un mensaje..."
                     class="message-input">
+                <input type="file" @change="attachFile" hidden ref="fileInput" />
+                
+                <button @click="triggerFileInput" class="attach-button">
+                    <i class="fas fa-paperclip"></i>
+                </button>
+                
                 <button @click="sendMessage" class="send-button">
                     <i class="fa-solid fa-paper-plane"></i>
                 </button>
             </div>
         </div>
 
+        <!-- Muestra el loader si está cargando o si no hay chat activo -->
+        <v-progress-circular v-if="loading || !chatHistory  || !activeGroup" indeterminate color="primary"></v-progress-circular>
+
         <block-user-dialog :value="isBlockUserDialogOpen" @update:value="isBlockUserDialogOpen = $event" />
     </section>
 </template>
 
 <script>
+import { sendMessage, sendFileMessage } from '@/api';  
+import defaultProfile from '@/assets/images/profile-default.jpg';
 import MenuComponent from '../general/MenuComponent.vue';
 import BlockUserDialog from '../dialogs/BlockUserDialog.vue';
 
@@ -41,73 +53,71 @@ export default {
         'block-user-dialog': BlockUserDialog,
     },
     props: {
-        chat: Object
+        chatHistory: Object,
+        activeGroup: Object,
+        userData: Object,
+        loading: Boolean,
     },
     data() {
         return {
-            isBlockUserDialogOpen: false,
-            user_id: 1,
+            loadingNoData: true,
+            defaultProfile: defaultProfile,
             newMessage: '',
             menuItems: [
                 { title: 'Bloquear', action: this.openBlockUserDialog },
+                { title: 'Cambiar Nombre', action: this.openBlockUserDialog },
+                { title: 'Salir del Grupo', action: this.openBlockUserDialog },
             ],
-            messages: [
-                { text: 'Hola', user_id: 1, updated_at: '24 jun - 17:45' },
-                { text: 'Tampoco he adelantado tanto', user_id: 1, updated_at: '24 jun - 17:45' },
-                { text: 'A okey', user_id: 2, updated_at: '24 jun - 17:45' },
-                { text: 'Voy a terminar la mayoria hoy', user_id: 2, updated_at: '24 jun - 17:45' },
-                { text: 'Hola', user_id: 1, updated_at: '24 jun - 17:45' },
-                { text: 'Tampoco he adelantado tanto', user_id: 1, updated_at: '24 jun - 17:45' },
-                { text: 'Hola', user_id: 1, updated_at: '24 jun - 17:45' },
-                { text: 'Tampoco he adelantado tanto', user_id: 1, updated_at: '24 jun - 17:45' },
-                { text: 'A okey', user_id: 2, updated_at: '24 jun - 17:45' },
-                { text: 'Voy a terminar la mayoria hoy', user_id: 2, updated_at: '24 jun - 17:45' },
-                { text: 'Hola', user_id: 1, updated_at: '24 jun - 17:45' },
-                { text: 'Tampoco he adelantado tanto', user_id: 1, updated_at: '24 jun - 17:45' },
-                { text: 'Hola', user_id: 1, updated_at: '24 jun - 17:45' },
-                { text: 'Tampoco he adelantado tanto', user_id: 1, updated_at: '24 jun - 17:45' },
-                { text: 'A okey', user_id: 2, updated_at: '24 jun - 17:45' },
-                { text: 'Voy a terminar la mayoria hoy', user_id: 2, updated_at: '24 jun - 17:45' },
-                { text: 'Hola', user_id: 1, updated_at: '24 jun - 17:45' },
-                { text: 'Tampoco he adelantado tanto', user_id: 1, updated_at: '24 jun - 17:45' },
-                { text: 'Hola', user_id: 1, updated_at: '24 jun - 17:45' },
-                { text: 'Tampoco he adelantado tanto', user_id: 1, updated_at: '24 jun - 17:45' },
-                { text: 'A okey', user_id: 2, updated_at: '24 jun - 17:45' },
-                { text: 'Voy a terminar la mayoria hoy', user_id: 2, updated_at: '24 jun - 17:45' },
-                { text: 'Hola', user_id: 1, updated_at: '24 jun - 17:45' },
-                { text: 'Tampoco he adelantado tanto', user_id: 1, updated_at: '24 jun - 17:45' },
-                { text: 'Hola', user_id: 1, updated_at: '24 jun - 17:45' },
-                { text: 'Tampoco he adelantado tanto', user_id: 1, updated_at: '24 jun - 17:45' },
-                { text: 'A okey', user_id: 2, updated_at: '24 jun - 17:45' },
-                { text: 'Voy a terminar la mayoria hoy', user_id: 2, updated_at: '24 jun - 17:45' },
-                { text: 'Hola', user_id: 1, updated_at: '24 jun - 17:45' },
-                { text: 'Tampoco he adelantado tanto', user_id: 1, updated_at: '24 jun - 17:45' },
-                { text: 'Hola', user_id: 1, updated_at: '24 jun - 17:45' },
-                { text: 'Tampoco he adelantado tanto', user_id: 1, updated_at: '24 jun - 17:45' },
-                { text: 'A okey', user_id: 2, updated_at: '24 jun - 17:45' },
-                { text: 'Voy a terminar la mayoria hoy', user_id: 2, updated_at: '24 jun - 17:45' },
-                { text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dictum erat dui, et semper lectus scelerisque ut. Fusce pellentesque a ipsum ut aliquet. Nam euismod tellus quis elementum mollis. Fusce eget fermentum ligula. Donec consequat lorem velit, et condimentum nunc volutpat ac. Aenean elementum erat eget iaculis auctor. Praesent eget nunc at tellus ornare sagittis eget molestie dolor. Maecenas nulla elit, semper at tempus at, maximus vel est. In eu magna nec mi iaculis cursus sit amet ac enim. Nunc in tellus lobortis, interdum dolor vitae, congue odio. Nunc id diam ut felis interdum hendrerit non ut tortor. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. ', user_id: 1, updated_at: '24 jun - 17:45' },
-                { text: 'Tampoco he adelantado tanto', user_id: 1, updated_at: '24 jun - 17:45' },
-            ]
+            isBlockUserDialogOpen: false,
         };
     },
-    methods: {
-        sendMessage() {
-            if (this.newMessage.trim() !== '') {
-                this.chat.messages.push({
-                    id: Date.now(),
-                    text: this.newMessage,
-                    isMine: true
-                });
-                this.newMessage = '';
+    computed: {
+        chatName() {
+            if (this.activeGroup.name) {
+                return this.activeGroup.name;
+            } else if(this.activeGroup.users) {
+                // Filtrar para no mostrar el nombre del usuario actual
+                const otherUser = this.activeGroup.users.find(user => user.id !== this.userData.id);
+                return otherUser ? otherUser.name : 'Unknown';
             }
+        },
+    },
+    methods: {
+        triggerFileInput() {
+            this.$refs.fileInput.click();
+        },
+        async sendMessage() {
+            if (this.newMessage.trim()) {
+                await sendMessage(this.newMessage, this.activeGroup.id);
+                this.newMessage = '';
+                // new Audio(sendSound).play();  // Reproduce el sonido
+            }
+        },
+        async attachFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('group_id', this.activeGroup.id);
+                const result = await sendFileMessage(formData);
+                alert('Archivo cargado correctamente');
+                // Aquí puedes manejar la actualización del chat con el nuevo mensaje/archivo enviado
+            } catch (error) {
+                alert('Error al cargar el archivo: ' + error.message);
+            }
+        },
+        formatDate(date) {
+            const d = new Date(date);
+            return `${d.getDate()} ${d.toLocaleString('default', { month: 'short' })} - ${d.getHours()}:${d.getMinutes()}`;
         },
         openBlockUserDialog() {
             this.isBlockUserDialogOpen = true;
-        }
+        },
     }
 };
 </script>
+
 
 <style scoped lang="scss">
 @import "../../../css/styles/main";
@@ -119,6 +129,11 @@ export default {
     flex-direction: column;
     justify-content: space-between;
     overflow: hidden;
+
+    &.loading {
+        justify-content: center;
+        align-items: center;
+    }
 }
 
 .chat-header {
@@ -157,12 +172,16 @@ export default {
 .messages-container {
     position: relative;
     overflow-y: scroll;
+    height: 100%;
 
     .messages {
         padding: 4px 16px;
         padding-bottom: 32px;
         height: calc(100% - 68px);
         overflow-y: scroll;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
     }
 
     .message {
@@ -214,7 +233,7 @@ export default {
         flex-grow: 1;
     }
 
-    .send-button {
+    .send-button, .attach-button {
         width: 46px;
 
         &:hover {
