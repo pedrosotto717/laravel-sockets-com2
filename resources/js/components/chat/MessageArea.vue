@@ -140,7 +140,6 @@ export default {
         },
         openBlockUserDialog() {
             this.action = this.activeGroup.is_group === 0 ? 'block' : 'leave';
-            console.log(this.activeGroup.is_group === 0 ? this.otherUser.email : this.activeGroup.id)
             this.itemId = this.activeGroup.is_group === 0 ? this.otherUser.email : this.activeGroup.id;
             this.isBlockUserDialogOpen = true;
         },
