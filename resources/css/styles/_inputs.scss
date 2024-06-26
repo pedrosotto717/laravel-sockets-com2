@@ -1,0 +1,39 @@
+input,
+textarea,
+select,
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus,
+button {
+    -webkit-text-fill-color: #F1F1F1;
+    -webkit-box-shadow: 0 0 0px 1000px $input-bg inset;
+    border: 1px solid $input-bg;
+    color: #fff;
+    transition: background-color 5000s ease-in-out 0s;
+    background-color: $input-bg;
+    padding: 9px;
+    border-radius: 8px;
+    margin: 0.5em 0;
+};
+
+button {
+    cursor: pointer;
+}
+
+.main-button {
+    box-shadow: 0 0 0px 1000px $main-color inset;
+    background-color: $main-color;
+}
+
+.input-container {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}

@@ -23,6 +23,7 @@ class NewMessageEvent implements ShouldBroadcast
      */
     public function __construct($chatGroupId)
     {
+        Log::info('Constructor');
         $this->chatGroupId = $chatGroupId;
     }
 
@@ -33,13 +34,11 @@ class NewMessageEvent implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        
         return  ['chat-group.' . $this->chatGroupId];
     }
 
     public function broadcastAs()
     {
-        
         return 'new-message.' . $this->chatGroupId;
     }
 }

@@ -6,8 +6,18 @@
         "build": "vite build"
     },
     "devDependencies": {
-        "axios": "^1.6.4",
+        "@vitejs/plugin-vue": "^5.0.5",
+        "axios": "^1.7.2",
         "laravel-vite-plugin": "^1.0",
+        "sass": "^1.77.6",
         "vite": "^5.0"
+    },
+    "dependencies": {
+        "@mdi/font": "^7.4.47",
+        "pusher-js": "^8.4.0-rc2",
+        "vue": "^3.4.30",
+        "vue-loader": "^17.4.2",
+        "vue-router": "^4.4.0",
+        "vuetify": "^3.6.0-beta.0.0"
     }
 }
