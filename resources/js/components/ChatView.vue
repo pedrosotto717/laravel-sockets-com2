@@ -5,7 +5,7 @@
             @chat-selected="handleChatSelected" @start-conversation="handleStartConversation" />
 
         <MessageArea v-if="chatHistory" :chatHistory="chatHistory" :activeGroup="activeGroup" :user-data="userData"
-            :loading="loadingChat" @chat-created="handleChatSelected" />
+            :loading="loadingChat" @chat-created="handleChatSelected" @refresh-contacts="refreshContactsChats" />
     </div>
     <v-progress-circular v-else indeterminate color="primary"></v-progress-circular>
 </template>
@@ -59,6 +59,11 @@ export default {
             }
         },
         async refreshContacts() {
+            await this.loadInitialData();
+        },
+        async refreshContactsChats() {
+            this.chatHistory = {};
+            this.activeGroup = {};
             await this.loadInitialData();
         },
         sortByUpdatedAt(items) {

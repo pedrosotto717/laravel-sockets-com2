@@ -14,7 +14,8 @@
             <div class="messages" v-if="chatHistory && chatHistory.messages && !loading">
                 <div v-for="message in chatHistory.messages.messages" :key="message.id" class="message"
                     :class="{ 'mine': message.user_id === userData.id, 'recived': message.user_id !== userData.id }">
-                    <span class="content" :style="{backgroundColor: (message.user_id === userData.id) ? userData.color_theme : '#2a3942'}">
+                    <span class="content"
+                        :style="{ backgroundColor: (message.user_id === userData.id) ? userData.color_theme : '#2a3942' }">
                         <template v-if="message.message">
                             {{ message.message }}
                         </template>
@@ -47,7 +48,8 @@
         <!-- Muestra el loader si está cargando o si no hay chat activo -->
         <v-progress-circular v-if="loading || !activeGroup" indeterminate color="primary"></v-progress-circular>
 
-        <block-user-dialog :value="isBlockUserDialogOpen" @update:value="isBlockUserDialogOpen = $event" />
+        <block-user-dialog :value="isBlockUserDialogOpen" @update:value="isBlockUserDialogOpen = $event"
+            :action="action" :itemId="itemId" @block-action="handleBlockedUser" />
     </section>
 </template>
 
@@ -73,13 +75,11 @@ export default {
             loadingNoData: true,
             defaultProfile: defaultProfile,
             newMessage: '',
-            menuItems: [
-                { title: 'Bloquear', action: this.openBlockUserDialog },
-                { title: 'Cambiar Nombre', action: this.openBlockUserDialog },
-                { title: 'Salir del Grupo', action: this.openBlockUserDialog },
-            ],
+            menuItems: [],
             isBlockUserDialogOpen: false,
             otherUser: {},
+            action: '',
+            itemId: null,
         };
     },
     computed: {
@@ -92,6 +92,15 @@ export default {
                 return this.otherUser ? this.otherUser.name : 'Unknown';
             }
         },
+    },
+    watch: {
+        'activeGroup': function (newVal, oldVal) {
+            if (newVal && newVal.is_group === 0) {
+                this.menuItems = [{ title: 'Eliminar Contacto', action: this.openBlockUserDialog }];
+            } else {
+                this.menuItems = [{ title: 'Salir del Grupo', action: this.openBlockUserDialog }];
+            }
+        }
     },
     methods: {
         triggerFileInput() {
@@ -130,11 +139,18 @@ export default {
             return `${d.getDate()} ${d.toLocaleString('default', { month: 'short' })} - ${d.getHours()}:${d.getMinutes()}`;
         },
         openBlockUserDialog() {
+            this.action = this.activeGroup.is_group === 0 ? 'block' : 'leave';
+            console.log(this.activeGroup.is_group === 0 ? this.otherUser.email : this.activeGroup.id)
+            this.itemId = this.activeGroup.is_group === 0 ? this.otherUser.email : this.activeGroup.id;
             this.isBlockUserDialogOpen = true;
         },
         getFileExtension(url) {
             const ext = url.split('.').pop();
             return ext ? `.${ext}` : '';
+        },
+        handleBlockedUser() {
+            this.isBlockUserDialogOpen = false; // Cerrar el diálogo
+            this.$emit('refresh-contacts');
         },
     }
 };

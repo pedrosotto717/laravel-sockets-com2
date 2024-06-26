@@ -30,3 +30,13 @@ export const fetchContactsWithoutChat = async () => {
         throw new Error(error.response.data.message || 'Failed to fetch contacts without chat');
     }
 };
+
+export const deleteContact = async (email) => {
+    try {
+        const response = await axios.delete(`/delete-contact`, { data: { email: email } });
+        return response.data;
+    } catch (error) {
+        console.error('Failed to delete contact:', error);
+        throw new Error(error.response.data.message || 'Failed to delete contact');
+    }
+};

@@ -23,3 +23,13 @@ export const fetchGroups = async () => {
         throw new Error(error.response.data.message || 'Failed to fetch groups');
     }
 };
+
+export const leaveGroup = async (groupId) => {
+    try {
+        const response = await axios.post(`/leave-group`, { group_id: groupId });
+        return response.data;
+    } catch (error) {
+        console.error('Failed to leave group:', error);
+        throw new Error(error.response.data.message || 'Failed to leave group');
+    }
+};
