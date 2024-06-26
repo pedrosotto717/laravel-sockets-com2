@@ -24,7 +24,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"name\": \"Gabriel Andrade\",\r\n    \"email\": \"gabriel@gmail.com\",\r\n    \"password\": \"12345678\"\r\n}",
+					"raw": "{\r\n    \"name\": \"Gabriel Andrade\",\r\n    \"email\": \"gabriel2@gmail.com\",\r\n    \"password\": \"12345678\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -149,7 +149,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"email\": \"sotto18a2000@gmail.com\",\r\n    \"name\": \"El Drope\"\r\n}",
+					"raw": "{\r\n    \"email\": \"gabriel2@gmail.com\",\r\n    \"name\": \"Gabito\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -210,7 +210,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"recipient_email\": \"eduardo@gmail.com\",\r\n    \"message\": \"Primer mensaje enviado en este grupo\",\r\n    \"group_id\": 3\r\n}",
+					"raw": "{\r\n    \"recipient_email\": \"eduardo@gmail.com\",\r\n    \"message\": \"Primer mensaje enviado en este grupo\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -483,6 +483,102 @@
 						}
 					]
 				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET Contact without chats",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "2|1H5gys7oYbdMJ4X5bIx78bM6ET9J80noRUH8QY6L154cb282"
+					}
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": "http://127.0.0.1:8000/api/contacts-without-chat"
+			},
+			"response": []
+		},
+		{
+			"name": "DELETE Contact",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "2|1H5gys7oYbdMJ4X5bIx78bM6ET9J80noRUH8QY6L154cb282"
+					}
+				},
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\": \"gabriel2@gmail.com\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://127.0.0.1:8000/api/delete-contact"
+			},
+			"response": []
+		},
+		{
+			"name": "Leave chat",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "2|1H5gys7oYbdMJ4X5bIx78bM6ET9J80noRUH8QY6L154cb282"
+					}
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"group_id\": 4\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://127.0.0.1:8000/api/leave-group"
 			},
 			"response": []
 		}

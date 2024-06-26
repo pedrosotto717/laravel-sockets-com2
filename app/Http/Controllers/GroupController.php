@@ -89,4 +89,34 @@ class GroupController extends Controller
             return response()->json(['message' => 'User already in the group'], 400);
         }
     }
+
+    public function leaveGroup(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'group_id' => 'required|integer|exists:chat_groups,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
+
+        // Obtener el grupo usando el group_id
+        $group = ChatGroup::find($request->group_id);
+
+        // Verificar si el grupo es grupal
+        if (!$group->is_group) {
+            return response()->json(['message' => 'Not a group chat'], 400);
+        }
+
+        // Verificar si el usuario autenticado es miembro del grupo
+        if (!$group->users()->find($request->user()->id)) {
+            return response()->json(['message' => 'User not a member of the group'], 404);
+        }
+
+        // Remover al usuario del grupo
+        $group->users()->detach($request->user()->id);
+
+        return response()->json(['message' => 'Successfully left the group']);
+    }
+
 }
