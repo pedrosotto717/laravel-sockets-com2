@@ -1,37 +1,32 @@
-version: '3.7'
+version: '3.8'
 
 services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    volumes:
-      - .:/var/www
-    networks:
-      - app-network
+    web:
+        image: instant-messaging-laravel-chat:latest
+        build:
+            target: web
+            context: .
+        env_file:
+            - .env
+        ports:
+            - "8000:80"
+        depends_on:
+            - db
+        entrypoint: ["./docker-entrypoint.sh"]
+        volumes:
+            - .:/var/www/html
 
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "8080:80"
-    volumes:
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
-      - .:/var/www
-    networks:
-      - app-network
+    db:
+        image: mysql:8.0
+        env_file:
+            - .env
+        environment:
+            MYSQL_DATABASE: 'comunicaciones2'
+            MYSQL_ROOT_PASSWORD: 'root'
+        ports:
+            - "3306:3306"
+        volumes:
+            - ./dbdata:/var/lib/mysql
 
-  db:
-    image: mysql:5.7
-    environment:
-      MYSQL_ROOT_PASSWORD: secret
-      MYSQL_DATABASE: comunicaciones2
-      MYSQL_USER: someuser
-      MYSQL_PASSWORD: secret
-    ports:
-      - "3306:3306"
-    networks:
-      - app-network
-
-networks:
-  app-network:
-    driver: bridge
+volumes:
+    dbdata:

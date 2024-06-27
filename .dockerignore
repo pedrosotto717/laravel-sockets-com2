@@ -1,0 +1,29 @@
+# Ignorar todo inicialmente
+**
+
+# Permitir archivos y directorios específicos
+!public/
+!resources/
+!routes/
+!storage/framework/views/
+!vendor/
+!.env.example
+!artisan
+!composer.json
+!composer.lock
+
+# Archivos de configuración y scripts necesarios
+!database/
+!docker-compose.yml
+!Dockerfile
+!init.sh
+
+# Excluir directorios que no se deben incluir
+node_modules/
+npm-debug.log
+.env.local
+.storage/
+bootstrap/cache/
+public/storage
+public/hot
+public/build
