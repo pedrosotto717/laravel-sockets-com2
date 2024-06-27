@@ -11,8 +11,14 @@ done
 
 composer install
 
+# Install NPM dependencies and build the project
+npm install
+npm run build
+
 # Run Laravel migrations
 php artisan migrate
+
+php artisan storage:link
 
 # Start Supervisor
 /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf

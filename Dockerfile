@@ -5,7 +5,9 @@ FROM php:8.2-apache as web
 RUN apt-get update && apt-get install -y \
     libzip-dev \
     zip \
-    supervisor
+    supervisor \
+    curl \
+    gnupg
 
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -29,6 +31,10 @@ WORKDIR /var/www/html
 
 # Install composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+# Install Node.js and npm
+RUN curl -sL https://deb.nodesource.com/setup_20.x | bash -
+RUN apt-get install -y nodejs
 
 # Set permissions
 RUN mkdir -p /var/www/html/bootstrap/cache

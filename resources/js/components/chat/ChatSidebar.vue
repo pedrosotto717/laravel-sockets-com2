@@ -13,13 +13,12 @@
         <div class="chats-container">
             <div class="chat-container" v-for="chat in chats" :key="chat.id" @click="handleChatSelected(chat)">
                 <div class="profile-img">
-                    <img :src="chat.profile_photo_url || defaultProfile" alt="Profile Image">
+                    <img :src="getImageUrl(chat)" alt="Profile Image">
                 </div>
                 <div class="chat-name">
                     {{ getChatName(chat) }}
                 </div>
-                <span v-if="chat.newMessages" class="dot-green">
-                </span>
+                <span v-if="chat.newMessages" class="dot-green"></span>
             </div>
         </div>
 
@@ -95,8 +94,13 @@ export default {
             this.isLogoutDialogOpen = true;
         },
 
-        getImageUrl(contact) {
-            return contact.profile_photo_url ? contact.profile_photo_url : this.defaultProfile;
+        getImageUrl(chat) {
+            if (chat.is_group) {
+                return this.defaultProfile;
+            } else {
+                const otherUser = chat.users.find(user => user.id !== this.userData.id);
+                return otherUser && otherUser.profile_photo ? `storage/${otherUser.profile_photo}` : this.defaultProfile;
+            }
         },
 
         handleContactAdded() {

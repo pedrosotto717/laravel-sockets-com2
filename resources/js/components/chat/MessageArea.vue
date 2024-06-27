@@ -3,7 +3,7 @@
         <!-- Encabezado solo se muestra si hay un chat activo y no está cargando -->
         <header class="chat-header" v-if="(chatHistory || activeGroup) && !loading">
             <div class="profile-img">
-                <img :src="otherUser.profile_photo_url || defaultProfile" alt="">
+                <img :src="otherUser && otherUser.id ? `storage/${otherUser.profile_photo}` : defaultProfile" alt="">
             </div>
             <h3 class="chat-name"><span class="name">{{ chatName }}</span></h3>
             <menu-component :items="menuItems" />
@@ -17,6 +17,9 @@
                     <span class="content"
                         :style="{ backgroundColor: (message.user_id === userData.id) ? userData.color_theme : '#2a3942' }">
                         <template v-if="message.message">
+                            <div v-if="activeGroup.is_group" class="author">
+                                <strong>{{ message.user.email }}:</strong>
+                            </div>
                             {{ message.message }}
                         </template>
                         <template v-else-if="message.file_url">
@@ -285,5 +288,13 @@ export default {
         }
     }
 
+}
+
+.author {
+    width: 100%;
+    font-size: 12px;
+    font-weight: 200;
+    padding-bottom: 12px;
+    color: #ddd;
 }
 </style>
