@@ -18,6 +18,8 @@
                 <div class="chat-name">
                     {{ getChatName(chat) }}
                 </div>
+                <span v-if="chat.newMessages" class="dot-green">
+                </span>
             </div>
         </div>
 
@@ -71,8 +73,10 @@ export default {
             isCreateGroupDialogOpen: false,
             isEditProfileDialogOpen: false,
             isStartConversationDialogOpen: false,
-            isLogoutDialogOpen: false, 
+            isLogoutDialogOpen: false,
         };
+    },
+    mounted() {
     },
     methods: {
         openAddUserDialog() {
@@ -122,7 +126,7 @@ export default {
                 const otherUser = chat.users.find(user => user.id !== this.userData.id);
                 return otherUser ? otherUser.name : 'Unknown';
             }
-        },
+        }
     }
 };
 </script>

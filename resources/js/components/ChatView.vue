@@ -32,18 +32,42 @@ export default {
             contactsWithoutChat: {},
             loadingChat: false,
             activeGroupId: null,
+            NotificationChatChannel: null,
+            NotificationChatChannelName: 'new-message',
         };
     },
     async mounted() {
         this.loadInitialData();
+
+        console.log('User Data mounted:', this.userData);
+        if(this.userData?.id && this.chats.length > 0){
+            this.handlerNotificationConnectToChannel(this.userData.id);
+        }
     },
     watch: {
         activeGroupId(value) {
             if (value) {
                 this.handlerConnectToChannel(value);
             }
+        },
+        userData(value) {
+            console.log('Chats 1 ------> ', this.chats);
+            if (value.id && this.chats.length > 0) {
+                this.handlerNotificationConnectToChannel(value.id);
+            }
+        },
+        chats(value) {
+            console.log('Chats 2 ------> ', this.chats);
+            if(this.userData?.id && this.chats.length > 0){
+                this.handlerNotificationConnectToChannel(this.userData.id);
+            }
         }
     },
+
+    beforeDestroy() {
+        this.NotificationChatChannel = disconnectFromChannel(this.NotificationChatChannel, this.NotificationChatChannelName);
+    },
+
     methods: {
         async loadInitialData() {
             try {
@@ -81,12 +105,20 @@ export default {
             }
 
             try {
-                const messages = await fetchMessages(chatGroupId);
+                const messages = await fetchMessages(chatGroupId, this.userData.email);
                 this.chatHistory = { ...this.chatHistory, messages, id: chatGroupId };
                 this.loadingChat = false;
             } catch (error) {
                 console.error("Error fetching chat details:", error);
             }
+
+            this.chats = this.chats.map(c => {
+                if (c.id === chatGroupId) {
+                    c.newMessages = false;
+                }
+
+                return c;
+            });
         },
 
         handleStartConversation(contactInfo) {
@@ -104,6 +136,29 @@ export default {
                 this.channel = connectToChannel(this.channelName);
                 this.channel.bind(channelAlias, function (val) {
                     self.handleChatSelected({ id: activeGroupId })
+                });
+            }
+        },
+
+        handlerNotificationConnectToChannel(userId) {
+            if (userId) {
+                const channelAlias = `new-notification`,
+                    self = this;
+
+                this.NotificationChatChannelName = `user-notifications.${userId}`;
+                this.NotificationChatChannel = connectToChannel(this.NotificationChatChannelName);
+
+                this.NotificationChatChannel.bind(channelAlias,  (val) => {
+                    const groupId = val.chatGroupId;
+
+                    if(groupId > 0) {
+                       this.chats = this.chats?.map(chat => {
+                            if(chat.id === groupId) {
+                                chat.newMessages = true;
+                            }
+                            return chat;
+                        });
+                    }
                 });
             }
         },

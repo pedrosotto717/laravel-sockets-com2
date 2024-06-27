@@ -109,7 +109,7 @@ export default {
         async sendMessage() {
             if (this.newMessage.trim()) {
 
-                let data = await sendMessage(this.newMessage, this.activeGroup.id, this.otherUser.email);
+                let data = await sendMessage(this.newMessage, this.activeGroup.id, this.userData.email, this.otherUser.email);
                 this.newMessage = '';
 
                 if (!this.activeGroup.id) {
