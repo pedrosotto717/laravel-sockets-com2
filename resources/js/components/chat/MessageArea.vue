@@ -88,7 +88,7 @@ export default {
         },
         async sendMessage() {
             if (this.newMessage.trim()) {
-                await sendMessage(this.newMessage, this.activeGroup.id);
+                await sendMessage(this.newMessage, this.activeGroup.id, this.userData.email);
                 this.newMessage = '';
                 // new Audio(sendSound).play();  // Reproduce el sonido
             }

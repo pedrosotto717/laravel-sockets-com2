@@ -14,6 +14,7 @@
     },
     "dependencies": {
         "@mdi/font": "^7.4.47",
+        "crypto-js": "^4.2.0",
         "pusher-js": "^8.4.0-rc2",
         "vue": "^3.4.30",
         "vue-loader": "^17.4.2",

@@ -67,7 +67,7 @@ export default {
             this.activeGroupId = chatGroupId
             try {
                 this.loadingChat = true;
-                const messages = await fetchMessages(chatGroupId);
+                const messages = await fetchMessages(chatGroupId, this.userData.email);
                 this.chatHistory = { ...this.chatHistory, messages, id: chatGroupId };
                 this.activeGroup = chat;
                 this.loadingChat = false;

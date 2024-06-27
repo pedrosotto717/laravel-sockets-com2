@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\CryptoHandler;
+use App\Events\MessageNotificationEvent;
 use App\Events\NewMessageEvent;
 use App\Models\ChatGroup;
 use App\Models\ChatMessage;
-use App\Models\Contact;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
@@ -27,6 +27,21 @@ class MessageController extends Controller
         }
 
         $chatGroup = null;
+        $creatorId = $request->user()->id;
+        $cryptoHandler = new CryptoHandler($request->user()->email);
+
+
+        // Desencriptar el mensaje antes de procesarlo
+        $decryptedMessage = "";
+        if (is_string($request->message)) {
+            $decryptedMessage = $request->message;
+        }else{
+            $decryptedMessage = $cryptoHandler->cryptoJsAesDecrypt($request->message);
+        }
+
+        if (!$decryptedMessage) {
+            return response()->json(['message' => 'Invalid message'], 422);
+        }
 
         if ($request->has('group_id')) {
             // Caso 1: Se proporciona un GroupID
@@ -52,11 +67,17 @@ class MessageController extends Controller
         $chatMessage = ChatMessage::create([
             'user_id' => $request->user()->id,
             'chat_group_id' => $chatGroup->id,
-            'message' => $request->message,
+            'message' => $decryptedMessage,
         ]);
 
-        // Log::info(print_r($chatMessage, true));
+        
         broadcast(new NewMessageEvent($chatGroup->id));
+        
+        $userIds = $chatGroup->users->where('id', '!=', $creatorId)->pluck('id')->all();
+        broadcast(new MessageNotificationEvent($chatGroup, $userIds));
+
+        //before to return the response, encrypt the message, use $request->message
+        $chatMessage->message = $request->message;
         
         return response()->json(['message' => 'Message sent successfully', 'chat_message' => $chatMessage], 201);
     }
@@ -73,6 +94,8 @@ class MessageController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
+        $creatorId = $request->user()->id;
+
         // Manejar el archivo adjunto
         $filePath = $request->file('file')->store('chat_files', 'public');
 
@@ -83,8 +106,15 @@ class MessageController extends Controller
             'file_path' => $filePath,
         ]);
 
+
+        // get group using id $request->group_id
+        $chatGroup = ChatGroup::find($request->group_id);
+
         // Emitir el evento de nuevo mensaje
         broadcast(new NewMessageEvent($request->group_id));
+
+        $userIds = $chatGroup->users->where('id', '!=', $creatorId)->pluck('id')->all();
+        broadcast(new MessageNotificationEvent($chatGroup, $userIds));
 
         return response()->json(['message' => 'Attachment sent successfully', 'chat_message' => $chatMessage], 201);
     }
@@ -92,6 +122,7 @@ class MessageController extends Controller
     public function getMessages(Request $request, $chatGroupId)
     {
         $chatGroup = ChatGroup::find($chatGroupId);
+        $cryptoHandler = new CryptoHandler($request->user()->email);
 
         if (!$chatGroup) {
             return response()->json(['message' => 'Chat group not found'], 404);
@@ -104,8 +135,10 @@ class MessageController extends Controller
 
         $messages = $chatGroup->messages()->get();
 
-        // Añadir la URL completa del archivo adjunto si existe
-        $messages->transform(function ($message) {
+        $messages = $messages->map(function ($message) use ($cryptoHandler) {
+            if ($message->message) {
+                $message->message = $cryptoHandler->cryptoJsAesEncrypt($message->message);
+            }
             if ($message->file_path) {
                 $message->file_url = Storage::url($message->file_path);
             }
