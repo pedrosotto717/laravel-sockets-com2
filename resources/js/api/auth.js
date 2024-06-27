@@ -12,7 +12,7 @@ export const login = async (userData) => {
 
 export const register = async (userData) => {
     try {
-        const response = await axios.post('/contacts', userData);
+        const response = await axios.post('/register', userData);
         localStorage.setItem('token', response.data.token); // Guardamos el token en el almacenamiento local
         return response.data;
     } catch (error) {

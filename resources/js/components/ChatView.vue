@@ -71,10 +71,19 @@ export default {
     methods: {
         async loadInitialData() {
             try {
-                this.userData = await fetchUserData();
-                this.contacts = await fetchContacts();
-                this.contactsWithoutChat = await fetchContactsWithoutChat();
-                this.chats = await fetchGroups();
+                // Ejecuta todas las promesas simultáneamente
+                const [userData, contacts, contactsWithoutChat, chats] = await Promise.all([
+                    fetchUserData(),
+                    fetchContacts(),
+                    fetchContactsWithoutChat(),
+                    fetchGroups()
+                ]);
+
+                // Asignar resultados a las propiedades de data
+                this.userData = userData;
+                this.contacts = contacts;
+                this.contactsWithoutChat = contactsWithoutChat;
+                this.chats = chats;
                 this.loaded = true;
             } catch (error) {
                 console.error(error);
