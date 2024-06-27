@@ -19,28 +19,6 @@ const CryptoJSAesJson = {
   }
 };
 
-
-export const cifrarTexto = (texto, email) => {
-  if(!texto) {
-      return null;
-  }
-
-  var textoCifrado = CryptoJS.AES.encrypt(texto, `messaging-${email}-key`).toString();
-  var encrypted = CryptoJS.AES.encrypt(JSON.stringify(texto), `messaging-${email}-key`, {format: CryptoJSAesJson}).toString();
-  return encrypted;
-}
-
-
-export  const descifrarTexto = (texto, email) => {
-  if(!texto) {
-      return null;
-  }
-  
-  var decrypted = JSON.parse(CryptoJS.AES.decrypt(texto, `messaging-${email}-key`, {format: CryptoJSAesJson}).toString(CryptoJS.enc.Utf8));
-  return decrypted;
-}
-
-
 export const decryptText = (text, email) => {
   try {
       if (!text) return null;
@@ -57,7 +35,9 @@ export const decryptText = (text, email) => {
 export const encryptText = (text, email) => {
   try {
       if (!text) return null;
-      return CryptoJS.AES.encrypt(JSON.stringify({text}), `message-${email}-key`, {format: CryptoJSAesJson}).toString();
+      const encrypted = CryptoJS.AES.encrypt(JSON.stringify({text}), `message-${email}-key`, {format: CryptoJSAesJson}).toString();
+
+      return encrypted;
   } catch (error) {
       console.error("Encryption error:", error);
       return null; // O manejar de otra manera

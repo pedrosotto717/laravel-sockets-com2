@@ -30,17 +30,11 @@ class MessageController extends Controller
         $creatorId = $request->user()->id;
         $cryptoHandler = new CryptoHandler($request->user()->email);
 
+        // Desencriptar el mensaje
+        $decryptedMessage = $cryptoHandler->cryptoJsAesDecrypt($request->message);
 
-        // Desencriptar el mensaje antes de procesarlo
-        $decryptedMessage = "";
-        if (is_string($request->message)) {
-            $decryptedMessage = $request->message;
-        }else{
-            $decryptedMessage = $cryptoHandler->cryptoJsAesDecrypt($request->message);
-        }
-
-        if (!$decryptedMessage) {
-            return response()->json(['message' => 'Invalid message'], 422);
+        if (!is_string($decryptedMessage['text'])) {
+            return response()->json(['message' => 'Decryption failed or invalid format'], 422);
         }
 
         if ($request->has('group_id')) {
@@ -53,7 +47,10 @@ class MessageController extends Controller
             // Obtener o crear el chat grupal entre ambos usuarios
             $chatGroup = ChatGroup::where('is_group', false)
                 ->whereHas('users', function ($query) use ($request, $recipientUser) {
-                    $query->whereIn('user_id', [$request->user()->id, $recipientUser->id]);
+                    $query->where('user_id', $request->user()->id);
+                })
+                ->whereHas('users', function ($query) use ($recipientUser) {
+                    $query->where('user_id', $recipientUser->id);
                 })
                 ->first();
 
@@ -67,10 +64,9 @@ class MessageController extends Controller
         $chatMessage = ChatMessage::create([
             'user_id' => $request->user()->id,
             'chat_group_id' => $chatGroup->id,
-            'message' => $decryptedMessage,
+            'message' => $decryptedMessage['text'],
         ]);
 
-        
         broadcast(new NewMessageEvent($chatGroup->id));
         
         $userIds = $chatGroup->users->where('id', '!=', $creatorId)->pluck('id')->all();

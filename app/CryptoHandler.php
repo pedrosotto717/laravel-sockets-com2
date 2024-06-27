@@ -40,9 +40,11 @@ class CryptoHandler
         }
         $passphrase = $this->key;
         $jsondata = json_decode($jsonString, true);
+
         $salt = hex2bin($jsondata["s"]);
         $ct = base64_decode($jsondata["ct"]);
         $iv  = hex2bin($jsondata["iv"]);
+
         $concatedPassphrase = $passphrase.$salt;
         $md5 = array();
         $md5[0] = md5($concatedPassphrase, true);

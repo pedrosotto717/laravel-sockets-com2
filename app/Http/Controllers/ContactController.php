@@ -114,6 +114,21 @@ class ContactController extends Controller
             return response()->json(['message' => 'Contact not found'], 404);
         }
 
+        // Obtener o crear el chat grupal entre ambos usuarios
+        $chatGroup = ChatGroup::where('is_group', false)
+            ->whereHas('users', function ($query) use ($request, $contactUser) {
+                $query->where('user_id', $request->user()->id);
+            })
+            ->whereHas('users', function ($query) use ($contactUser) {
+                $query->where('user_id', $contactUser->id);
+            })
+            ->first();
+
+        // Si existe el chat grupal, eliminarlo
+        if ($chatGroup) {
+            $chatGroup->delete();
+        }
+
         // Eliminar el contacto
         $contact->delete();
 

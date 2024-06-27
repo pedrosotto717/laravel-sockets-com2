@@ -6,10 +6,18 @@
                 <v-spacer></v-spacer>
             </v-card-title>
             <v-card-text>
-                <v-list class="contacts-container">
+                <div v-if="contacts.length === 0" class="no-contacts-message">
+                    Ya has iniciado una conversación con todos tus contactos.
+                </div>
+                <v-list v-else class="contacts-container">
                     <v-list-item v-for="contact in contacts" :key="contact.id" @click="selectContact(contact)">
                         <v-list-item-content>
-                            <v-list-item-title class="option-contacts">{{ contact.name }} <span class="cta">Ir al Chat</span></v-list-item-title>
+                            <v-list-item-title class="option-contacts">
+                                <span class="contact-data">
+                                    {{ contact.contact.name }}
+                                    <span class="email">( {{ contact.contact.email }} )</span>
+                                </span>
+                                <span class="cta">Ir al Chat</span></v-list-item-title>
                         </v-list-item-content>
                     </v-list-item>
                 </v-list>
@@ -32,8 +40,8 @@ export default {
     },
     methods: {
         selectContact(contact) {
-            this.$emit('contact-selected', contact);
-            this.dialog = false; // Cierra el diálogo después de seleccionar el contacto
+            this.$emit('contact-selected', { email: contact.contact.email, name: contact.contact.name, id: contact.contact.id });
+            this.dialog = false;
         }
     }
 };
@@ -50,11 +58,25 @@ export default {
 .option-contacts {
     display: flex;
     justify-content: space-between;
+    flex-wrap: wrap;
     padding-bottom: 16px;
     border-bottom: $border;
+    align-items: center;
 }
 
 .cta {
     color: $main-color;
+}
+
+.contact-data {
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+    gap: 8px;
+
+    .email {
+        font-size: 12px;
+        font-weight: 200;
+    }
 }
 </style>

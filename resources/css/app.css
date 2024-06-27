@@ -38,3 +38,11 @@ body {
     padding: 0;
     display: none;
 }
+
+.dot-green{
+    background-color: #3da685;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}

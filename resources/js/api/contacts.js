@@ -21,3 +21,22 @@ export const addContact = async (email, name) => {
         }
     }
 };
+
+export const fetchContactsWithoutChat = async () => {
+    try {
+        const response = await axios.get('/contacts-without-chat');
+        return response.data.contacts;
+    } catch (error) {
+        throw new Error(error.response.data.message || 'Failed to fetch contacts without chat');
+    }
+};
+
+export const deleteContact = async (email) => {
+    try {
+        const response = await axios.delete(`/delete-contact`, { data: { email: email } });
+        return response.data;
+    } catch (error) {
+        console.error('Failed to delete contact:', error);
+        throw new Error(error.response.data.message || 'Failed to delete contact');
+    }
+};
