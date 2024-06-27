@@ -41,6 +41,7 @@ RUN mkdir -p /var/www/html/bootstrap/cache
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Copy Supervisor configuration
+RUN chmod +x ./docker-entrypoint.sh
 RUN chown 777 super.conf
 COPY super.conf /etc/supervisor/conf.d/supervisord.conf
 

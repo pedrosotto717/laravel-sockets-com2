@@ -3,7 +3,11 @@
         <!-- Encabezado solo se muestra si hay un chat activo y no está cargando -->
         <header class="chat-header" v-if="(chatHistory || activeGroup) && !loading">
             <div class="profile-img">
-                <img :src="otherUser && otherUser.id ? `storage/${otherUser.profile_photo}` : defaultProfile" alt="">
+                <img :src="otherUser && otherUser.id 
+                    ? otherUser.profile_photo 
+                        ? `storage/${otherUser.profile_photo}`
+                        : defaultProfile
+                    : defaultProfile" alt="">
             </div>
             <h3 class="chat-name"><span class="name">{{ chatName }}</span></h3>
             <menu-component :items="menuItems" />
@@ -173,6 +177,7 @@ export default {
     &.loading {
         justify-content: center;
         align-items: center;
+        flex-direction: row;
     }
 }
 
