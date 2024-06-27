@@ -11,6 +11,7 @@
 !artisan
 !composer.json
 !composer.lock
+!*.conf
 
 # Archivos de configuración y scripts necesarios
 !database/

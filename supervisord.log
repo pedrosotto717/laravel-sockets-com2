@@ -1,0 +1,7 @@
+2024-06-27 05:25:37,280 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2024-06-27 05:25:37,284 INFO supervisord started with pid 45
+2024-06-27 05:25:38,290 INFO spawned: 'apache2' with pid 46
+2024-06-27 05:25:38,296 INFO spawned: 'laravel-worker_00' with pid 47
+2024-06-27 05:25:38,424 CRIT uncaptured python exception, closing channel <POutputDispatcher at 140154091494800 for <Subprocess at 140154091832016 with name apache2 in state STARTING> (stderr)> (<class 'OSError'>:[Errno 29] Illegal seek [/usr/lib/python3/dist-packages/supervisor/supervisord.py|runforever|218] [/usr/lib/python3/dist-packages/supervisor/dispatchers.py|handle_read_event|276] [/usr/lib/python3/dist-packages/supervisor/dispatchers.py|record_output|210] [/usr/lib/python3/dist-packages/supervisor/dispatchers.py|_log|179] [/usr/lib/python3/dist-packages/supervisor/loggers.py|info|327] [/usr/lib/python3/dist-packages/supervisor/loggers.py|log|345] [/usr/lib/python3/dist-packages/supervisor/loggers.py|emit|227] [/usr/lib/python3/dist-packages/supervisor/loggers.py|doRollover|264])
+2024-06-27 05:25:39,438 INFO success: apache2 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-06-27 05:25:39,438 INFO success: laravel-worker_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)

@@ -21,8 +21,8 @@ services:
         env_file:
             - .env
         environment:
-            MYSQL_DATABASE: 'comunicaciones2'
-            MYSQL_ROOT_PASSWORD: 'root'
+            MYSQL_DATABASE: ${DB_DATABASE}
+            MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
         ports:
             - "3306:3306"
         volumes:

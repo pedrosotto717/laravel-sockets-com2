@@ -14,5 +14,5 @@ composer install
 # Run Laravel migrations
 php artisan migrate
 
-# Start Apache
-apache2-foreground
+# Start Supervisor
+/usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
